@@ -1,0 +1,22 @@
+version: "3.8"
+x-logging: &logging
+  logging:
+    driver: loki
+    options:
+      loki-url: "http://localhost:3200/loki/api/v1/push"
+      loki-external-labels: "type=dev,repo=${COMPOSE_PROJECT_NAME},job=docker,container_name={{.Name}}"
+
+services:
+  manager:
+    <<: *logging
+    image: ${REGISTRY_HOST}/${GIT_REPO_NAME}.${BRANCH_NAME}
+    restart: unless-stopped
+    labels:
+      - "io.portainer.accesscontrol.teams=devs,managers"
+    networks:
+      - default
+
+networks:
+  default:
+    name: ${COMPOSE_PROJECT_NAME}
+    external: true
